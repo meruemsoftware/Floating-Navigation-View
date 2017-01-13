@@ -158,7 +158,9 @@ public class FloatingNavigationView extends FloatingActionButton {
                 mNavigationView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 updateFabBounds();
                 drawMenuBelowFab();
-                startOpenAnimations();
+                if (21 <= android.os.Build.VERSION.SDK_INT) {
+                    startOpenAnimations();
+                }
             }
         });
     }
@@ -167,7 +169,11 @@ public class FloatingNavigationView extends FloatingActionButton {
         if (!isOpened()) {
             return;
         }
-        startCloseAnimations();
+        if (21 <= android.os.Build.VERSION.SDK_INT) {
+            startCloseAnimations();
+        } else {
+            detachNavigationView();
+        }
     }
 
     public boolean isOpened() {
@@ -187,12 +193,6 @@ public class FloatingNavigationView extends FloatingActionButton {
                 gravity = layoutParams.gravity;
             }
         }
-
-        // Gravity.START and Gravity.END don't work for views added in WindowManager with RTL.
-        // We need to convert script specific gravity to absolute horizontal value
-        // If horizontal direction is LTR, then START will set LEFT and END will set RIGHT.
-        // If horizontal direction is RTL, then START will set RIGHT and END will set LEFT.
-        gravity = Gravity.getAbsoluteGravity(gravity, getLayoutDirection());
 
         mWindowManager.addView(mNavigationView, createLayoutParams(gravity));
     }
@@ -269,11 +269,8 @@ public class FloatingNavigationView extends FloatingActionButton {
         layoutParams.width = getWidth();
         layoutParams.height = getHeight();
         layoutParams.topMargin = mFabRect.top;
-        if (getLayoutDirection() == LAYOUT_DIRECTION_RTL) {
-            layoutParams.rightMargin = mNavigationView.getWidth() - mFabRect.right;
-        } else {
-            layoutParams.leftMargin = mFabRect.left;
-        }
+        layoutParams.leftMargin = mFabRect.left;
+
         mFabView.setLayoutParams(layoutParams);
     }
 
